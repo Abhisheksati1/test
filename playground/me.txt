@@ -1,5 +1,0 @@
-{{#user}
-Name:Abhishek Sati
-Skills: Python, Java, c, Data Structure, OOPs, Web Scraping, Linux, SQL, Flask, Java Swing, Git, .net(C#)
-Email: abhisheksati9876@gmail.com
-{{/user}}
