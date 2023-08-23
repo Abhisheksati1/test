@@ -215,3 +215,46 @@ content = pp.Group(pp.Combine(pp.OneOrMore(stripped_whitespace | unstripped_whit
 program_chunk <<= (long_comment | comment | escaped_command | unrelated_escape | block_partial | block_command | partial | command | content).leave_whitespace()
 program <<= pp.ZeroOrMore(program_chunk)("program").leave_whitespace().set_name("program")
 grammar = (program + pp.StringEnd()).parse_with_tabs()
+
+#Cretes the Utility function here
+def format_chat_template(input_text):
+    # Parse the input text using the defined grammar
+    parsed_structure = grammar.parseString(input_text, parseAll=True)
+
+    # Initialize variables to keep track of user and assistant segments
+    user_segment = []
+    assistant_segment = []
+    # Iterate through the parsed structure and format segments
+    for node in parsed_structure:
+        if isinstance(node, SavedTextNode):
+            print(node.get_name())
+            if node.get_name() == "command":
+                if "gen" in node.text:
+                    # Assistant command, wrap in assistant tags
+                    assistant_segment.append(node.text)
+                else:
+                    # User text, wrap in user tags
+                    user_segment.append(node.text)
+            else:
+                # Other nodes, append to appropriate segment
+                if assistant_segment:
+                    assistant_segment.append(node.text)
+                else:
+                    user_segment.append(node.text)
+        else:
+          user_segment.append(node[0])
+
+    # Construct the formatted output
+    formatted_output = "{{#user}}\n{}\n{{/user}}".format("".join(user_segment))
+    if assistant_segment:
+        formatted_output += " {{#assistant}}\n{}\n{{/assistant}}".format("".join(assistant_segment))
+    else:
+        formatted_output += " {{#assistant}}\n{{gen 'write' }}\n{{/assistant}}"
+
+    return formatted_output
+
+# Example usage
+input_text = input()
+formatted_output = format_chat_template(input_text)
+print(formatted_output)
+
