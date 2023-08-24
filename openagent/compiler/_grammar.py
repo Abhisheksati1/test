@@ -224,37 +224,38 @@ def format_chat_template(input_text):
     # Initialize variables to keep track of user and assistant segments
     user_segment = []
     assistant_segment = []
+
+    formatted_output = str()
+    assistant_output_added = False
     # Iterate through the parsed structure and format segments
     for node in parsed_structure:
         if isinstance(node, SavedTextNode):
-            print(node.get_name())
             if node.get_name() == "command":
                 if "gen" in node.text:
                     # Assistant command, wrap in assistant tags
-                    assistant_segment.append(node.text)
+                    #assistant_segment.append(node.text)
+                    assistant_output_added = True
+                    formatted_output += "{{#assistant}}{}{{/assistant}}\n".format(node.text)
                 else:
                     # User text, wrap in user tags
                     user_segment.append(node.text)
             else:
                 # Other nodes, append to appropriate segment
                 if assistant_segment:
-                    assistant_segment.append(node.text)
+                    formatted_output += "{{#assistant}}{}{{/assistant}}\n".format(node.text)
+                    assistant_output_added = False
                 else:
                     user_segment.append(node.text)
         else:
-          user_segment.append(node[0])
+          for string in node:
+            formatted_output += "{{#user}}{}{{/user}}\n".format(string)
 
-    # Construct the formatted output
-    formatted_output = "{{#user}}\n{}\n{{/user}}".format("".join(user_segment))
-    if assistant_segment:
-        formatted_output += " {{#assistant}}\n{}\n{{/assistant}}".format("".join(assistant_segment))
-    else:
-        formatted_output += " {{#assistant}}\n{{gen 'write' }}\n{{/assistant}}"
+    if not assistant_output_added:
+      formatted_output += "{#assistant}{{gen 'write'}}{/assistant}"
 
     return formatted_output
 
 # Example usage
-input_text = input()
+input_text = "how are things going, tell me about Delhi"
 formatted_output = format_chat_template(input_text)
 print(formatted_output)
-
