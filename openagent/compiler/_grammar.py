@@ -222,8 +222,6 @@ def format_chat_template(input_text):
     parsed_structure = grammar.parseString(input_text, parseAll=True)
 
     # Initialize variables to keep track of user and assistant segments
-    user_segment = []
-    assistant_segment = []
 
     formatted_output = str()
     assistant_output_added = False
@@ -237,15 +235,13 @@ def format_chat_template(input_text):
                     assistant_output_added = True
                     formatted_output += "{{#assistant}}{}{{/assistant}}\n".format(node.text)
                 else:
-                    # User text, wrap in user tags
-                    user_segment.append(node.text)
+                    assistant_output_added = True
+                    formatted_output += "{{#assistant}}{}{{/assistant}}\n".format(node.text)
             else:
                 # Other nodes, append to appropriate segment
                 if assistant_segment:
                     formatted_output += "{{#assistant}}{}{{/assistant}}\n".format(node.text)
                     assistant_output_added = False
-                else:
-                    user_segment.append(node.text)
         else:
           for string in node:
             formatted_output += "{{#user}}{}{{/user}}\n".format(string)
